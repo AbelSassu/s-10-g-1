@@ -1,96 +1,88 @@
-import React from "react";
-import { Button, Form } from "react-bootstrap";
+import { Component } from 'react'
+import { Button, Form } from 'react-bootstrap'
 
-class AddComment extends React.Component {
-    state = {
-        comment: {
-            comment: "",
-            rate: 1,
-            elementId: this.props.asin,
-        },
-    };
+class AddComment extends Component {
+  state = {
+    commentObject: {
+      comment: '',
+      rate: '1',
+      elementId: this.props.bookId,
+    },
+  }
 
-    sendComment = async (e) => {
-        e.preventDefault();
-        try {
-            let response = await fetch(
-                "https://striveschool-api.herokuapp.com/api/comments",
-                {
-                    method: "POST",
-                    body: JSON.stringify(this.state.comment),
-                    headers: {
-                        Authorization:
-                            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTczNGM3YWZlMDMxZTAwMTliYTE5MmEiLCJpYXQiOjE3MDQ3MTg5NTAsImV4cCI6MTcwNTkyODU1MH0.z-ii0csj3UTWTwbvV9p6WiAV4k8b0x9FYVOUDGlb3fE",
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            if (response.ok) {
-                alert("Fatti una vita.");
-                this.setState({
-                    comment: {
-                        comment: "",
-                        rate: 1,
-                        elementId: this.props.asin,
-                    },
-                });
-            } else {
-                alert("Qualcosa è andato storto");
-            }
-        } catch (err) {
-            console.log("Errore:", err);
-            alert("Errore");
+  sendNewReview = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await fetch(
+        'https://striveschool-api.herokuapp.com/api/comments',
+        {
+          method: 'POST',
+          headers: {
+            Authorization:
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTljMjljZGUwZGQxZDAwMTgyZDE4YjQiLCJpYXQiOjE3MDQ3MzMxMzMsImV4cCI6MTcwNTk0MjczM30.iQcrWjbTsWpnknSarl5aGt0OIZdVmCV9H_Zgypx-EKE',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(this.state.commentObject),
         }
-    };
-
-    render() {
-        return (
-            <div className="mb-3">
-                <Form onSubmit={this.sendComment}>
-                    <Form.Group>
-                        <Form.Label>Commenta qua sotto!</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ti rode il culo? Scrivilo qua!"
-                            value={this.state.comment.comment}
-                            onChange={(e) =>
-                                this.setState({
-                                    comment: {
-                                        ...this.state.comment,
-                                        comment: e.target.value,
-                                    },
-                                })
-                            }
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Voto da 1 a 5</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={this.state.comment.rate}
-                            onChange={(e) =>
-                                this.setState({
-                                    comment: {
-                                        ...this.state.comment,
-                                        rate: e.target.value,
-                                    },
-                                })
-                            }
-                        >
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
-                        </Form.Control>
-                    </Form.Group>
-                    <Button className="mt-3" variant="primary" type="submit">
-                        Invia
-                    </Button>
-                </Form>
-            </div>
-        );
+      )
+      if (response.ok) {
+        // il commento è stato inviato!
+        alert('commento salvato!');
+        this.props.aggiornaCommenti();
+      } else {
+        throw new Error('errore nel salvataggio del commento')
+      }
+    } catch (error) {
+      console.log('error', error)
     }
+  }
+
+  render() {
+    return (
+      <Form onSubmit={this.sendNewReview}>
+        <Form.Group className="mb-1 mt-4">
+          <Form.Label>Commento</Form.Label>
+          <Form.Control
+            type="text"
+            value={this.state.commentObject.comment}
+            onChange={(e) => {
+              this.setState({
+                commentObject: {
+                  ...this.state.commentObject,
+                  comment: e.target.value,
+                },
+              })
+            }}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Rating</Form.Label>
+          <Form.Select
+            aria-label="comment rating"
+            value={this.state.commentObject.rate}
+            onChange={(e) => {
+              this.setState({
+                commentObject: {
+                  ...this.state.commentObject,
+                  rate: e.target.value,
+                },
+              })
+            }}
+          >
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </Form.Select>
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Invia
+        </Button>
+      </Form>
+    )
+  }
 }
 
-export default AddComment;
+export default AddComment
